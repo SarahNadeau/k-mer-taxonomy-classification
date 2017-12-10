@@ -1,0 +1,20 @@
+k = 15, required k-mer hits = 1, # of sequences tested = 30
+
+k = 15, required k-mer hits = 1, # of sequences tested = 100
+
+100.00% precision
+28.00% sensitivity at the domain level
+28.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+k = 20, required k-mer hits = 1, # of sequences tested = 100
+
+100.00% precision
+1.00% sensitivity at the domain level
+1.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
