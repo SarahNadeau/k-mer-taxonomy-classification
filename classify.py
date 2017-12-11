@@ -8,7 +8,8 @@ import json
 import os
 import numpy as np
 import pydot
-from get_test_short_reads import get_test_reads, get_test_tax
+# from get_test_short_reads import get_test_reads, get_test_tax
+from get_test_reads_sra import get_test_reads, get_test_tax
 from build_ref_dict import build_ref_tax_dict, build_ref_kmer_dict_no_overlap, write_to_file
 from operator import itemgetter
 
@@ -27,14 +28,18 @@ class GetFiles(object):
         return unclassified_reads
 
     @staticmethod
-    def get_from_directory(num_test_seqs):
-        file_list = []
-        for file_name in os.listdir("Genomes"):
-            if file_name.endswith("test.gbff"):
-                file_name = os.path.join("Genomes", file_name)
-                file_list.append(file_name)
-                unclassified_reads = get_test_reads(file_list, 150, num_test_seqs)
-        true_tax = get_test_tax(file_list)
+    # def get_from_directory(num_test_seqs):
+    #     file_list = []
+    #     for file_name in os.listdir("Genomes"):
+    #         if file_name.endswith("test.gbff"):
+    #             file_name = os.path.join("Genomes", file_name)
+    #             file_list.append(file_name)
+    #             unclassified_reads = get_test_reads(file_list, 150, num_test_seqs)
+    #     true_tax = get_test_tax(file_list)
+    #     return unclassified_reads, true_tax
+    def get_from_directory(num_test_seqs, file):
+        unclassified_reads = get_test_reads(file, 150, num_test_seqs)
+        true_tax = get_test_tax(file)
         return unclassified_reads, true_tax
 
 
@@ -208,7 +213,7 @@ def write_results(true_tax, tax_class_dict, total_reads, k, req_hits, num_test_s
 
     # write results to file "classification_results.txt"
     file = open("classification_results.txt", 'a')
-    file.write('k = {0}, required k-mer hits = {1}, # of sequences tested = {2}\n\n'.format(k, req_hits, num_test_seqs))
+    file.write('organism: {3}, k = {0}, required k-mer hits = {1}, # of sequences tested = {2}\n\n'.format(k, req_hits, num_test_seqs, true_tax[-1]))
     file.write("{0:.2f}% precision\n".format(precision))
     file.write('{0:.2f}% sensitivity at the domain level\n'.format(sensitivity_domain))
     file.write('{0:.2f}% sensitivity at the phylum level\n'.format(sensitivity_phylum))
@@ -317,14 +322,6 @@ def main():
             input("Enter number of test sequences to generate, as integer: "))  # SET # READS TO TEST WITH!
 
     print("Remember to rebuild k-mer dict if switching training organism set!")
-
-    # get test reads and true taxonomy
-    print("...getting short test sequence samples")
-    # unclassified_reads = GetFiles.get_with_fasta_filename("H02.fastq")
-    unclassified_reads, true_tax = GetFiles.get_from_directory(num_test_seqs)
-    total_reads = len(unclassified_reads)
-    print("# reads to be classified: {}".format(len(unclassified_reads)))
-
     try:
         print("...loading k-mer dictionary")
         file = open("Ref_kmer_dict" + str(k) + ".txt", 'r')
@@ -338,45 +335,57 @@ def main():
         ref_tax_dict = json.loads(tax_string)
         file.close()
 
-    except FileNotFoundError:
+    except IOError or FileNotFoundError:
         ref_tax_dict, ref_genome_dict = build_ref_tax_dict()
         ref_kmer_dict = build_ref_kmer_dict_no_overlap(ref_genome_dict, ref_tax_dict, k)
         write_to_file(ref_kmer_dict, ref_tax_dict, k)
 
     # create tree and graph with reference organisms
-    tree = create_tree(ref_tax_dict)
+    # tree = create_tree(ref_tax_dict)
     # graph_tree(tree, filename='Graph_of_ref_organisms.png')
 
     # add test genome organism to figure and denote nodes with dotted lines
-    tree = add_to_tree_dict(tree, true_tax)
-    graph = graph_tree(tree, filename='Figures/Graph_with_classified_reads.png')
-    taxa_in_ref = []
-    for key in list(ref_tax_dict):
-        for entry in ref_tax_dict[key]:
-            taxa_in_ref.append(entry)
-    for i in range(0, len(true_tax)):
-        if true_tax[i] not in taxa_in_ref:
-            graph = update_node_label(true_tax[i], 'NA', graph, style='dotted')
+    # tree = add_to_tree_dict(tree, true_tax)
+    # graph = graph_tree(tree, filename='Figures/Graph_with_classified_reads.png')
+    # taxa_in_ref = []
+    # for key in list(ref_tax_dict):
+    #     for entry in ref_tax_dict[key]:
+    #         taxa_in_ref.append(entry)
+    # for i in range(0, len(true_tax)):
+    #     if true_tax[i] not in taxa_in_ref:
+    #         graph = update_node_label(true_tax[i], 'NA', graph, style='dotted')
 
-    # classify taxonomy of sample reads
-    print("...classifying reads")
-    tax_class_dict = {}
-    seq_num = 0
-    unclassified = 0
-    for read in unclassified_reads:
-        # seq = read.seq # for when parsing fastq file
-        seq = read # for when input is gbff file
-        common_k_mer_dict = count_k_mers(k, seq, ref_kmer_dict)
-        classify(seq_num, common_k_mer_dict, ref_tax_dict, tax_class_dict, unclassified, req_hits)
-        seq_num += 1
+    # get test reads and true taxonomy
+    print("...getting short test sequence samples")
+    # unclassified_reads = GetFiles.get_with_fasta_filename("H02.fastq")
+    file_list = []
+    for file_name in os.listdir("SRA_Test_Sequences"):
+        if file_name.endswith("fastq"):
+            file_name = os.path.join("SRA_Test_Sequences", file_name)
+            file_list.append(file_name)
+    for file in file_list:
+        unclassified_reads, true_tax = GetFiles.get_from_directory(num_test_seqs, file)
+        total_reads = len(unclassified_reads)
 
-    # check accuracy and write results to file
-    print("...checking accuracy")
-    write_results(true_tax, tax_class_dict, total_reads, k, req_hits, num_test_seqs)
+        # classify taxonomy of sample reads
+        print("...classifying reads")
+        tax_class_dict = {}
+        seq_num = 0
+        unclassified = 0
+        for read in unclassified_reads:
+            # seq = read.seq # for when parsing fastq file
+            seq = read # for when input is gbff file
+            common_k_mer_dict = count_k_mers(k, seq, ref_kmer_dict)
+            classify(seq_num, common_k_mer_dict, ref_tax_dict, tax_class_dict, unclassified, req_hits)
+            seq_num += 1
 
-    # add newly classified reads to graph node labels
-    print("...graphing")
-    add_classified_reads_to_graph(tax_class_dict, graph)
+        # check accuracy and write results to file
+        print("...checking accuracy")
+        write_results(true_tax, tax_class_dict, total_reads, k, req_hits, num_test_seqs)
+
+        # add newly classified reads to graph node labels
+        # print("...graphing")
+        # add_classified_reads_to_graph(tax_class_dict, graph)
 
 
 if __name__ == "__main__":
