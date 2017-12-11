@@ -12,7 +12,7 @@ def build_ref_tax_dict():
     print("...building reference taxonomy dictionary")
     file_list = []
     for file_name in os.listdir("Genomes"):
-        if file_name.endswith(".gbff") and not file_name.endswith("_.gbff"):
+        if file_name.endswith(".gbff") and not file_name.endswith("test.gbff"):
             file_name = os.path.join("Genomes", file_name)
             file_list.append(file_name)
     # make dictionary of reference organism sequence objects labeled by seq_id
@@ -21,7 +21,9 @@ def build_ref_tax_dict():
     for file in file_list:
         for accession in SeqIO.parse(file, 'genbank'):
             ref_genome_dict[accession.id] = accession.seq
-            ref_tax_dict[accession.id] = accession.annotations['taxonomy']
+            taxonomy = accession.annotations['taxonomy']
+            taxonomy.append(accession.annotations['organism'])
+            ref_tax_dict[accession.id] = taxonomy
     return ref_tax_dict, ref_genome_dict
 
 def build_ref_kmer_dict_overlapping(ref_genome_dict, ref_tax_dict, k):

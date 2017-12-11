@@ -30,7 +30,6 @@ class GetFiles(object):
     def get_from_directory(num_test_seqs):
         file_list = []
         for file_name in os.listdir("Genomes"):
-        # for file_name in os.listdir("./ncbi-actinobacteria_reference-genomes-2017-12-03"):
             if file_name.endswith("test.gbff"):
                 file_name = os.path.join("Genomes", file_name)
                 file_list.append(file_name)
