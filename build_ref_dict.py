@@ -22,7 +22,8 @@ def build_ref_tax_dict():
         for accession in SeqIO.parse(file, 'genbank'):
             ref_genome_dict[accession.id] = accession.seq
             taxonomy = accession.annotations['taxonomy']
-            taxonomy.append(accession.annotations['organism'])
+            if accession.annotations['organism'].split(' ')[1] not in taxonomy[-1]:
+                taxonomy.append(accession.annotations['organism'])
             ref_tax_dict[accession.id] = taxonomy
     return ref_tax_dict, ref_genome_dict
 

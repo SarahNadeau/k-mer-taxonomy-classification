@@ -30,6 +30,7 @@ def get_test_tax(file):
                     'SRR005145': ['Bacteria', 'Actinobacteria', 'Coriobacteriales', 'Atopobiaceae', 'Atopobium', 'Atopobium rimae'],
                     'SRR6045835': ['Bacteria', 'Actinobacteria', 'Corynebacteriales', 'Mycobacteriaceae', 'Mycobacterium', 'Mycobacterium tuberculosis complex']}
     # SRR6357671, SRR006904, and SRR5324459 do not exist in Actinobacteria complete reference genomes
+    # HiSeq, HiSeq, 454 GS FLX, 454 GS FLX, MiSeq
     for record in SeqIO.parse(file, 'fastq'):
         SRR = record.id.split('.')[0]
         true_tax = SRR_tax_dict[SRR]

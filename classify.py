@@ -106,43 +106,14 @@ def classify(seq_num, common_k_mer_dict, ref_tax_dict, tax_class_dict, unclassif
     # if hits found only in one reference genome:
     if len(acc_ids) == 1:
         # this is currently in memory
-        # tax_class_dict[seq_num] = ref_tax_dict[acc_ids[0]] # !! for large # sample reads, should write to file instead
+        tax_class_dict[seq_num] = ref_tax_dict[acc_ids[0]] # !! for large # sample reads, should write to file instead
         # try not classifying if in only one genome:
-        unclassified += 1
+        # unclassified += 1
 
     # if hits found in multiple reference genomes:
     elif len(acc_ids) > 1:
         # 1) To classify by LCA:
-        # taxonomy = []
-        # for acc_id in acc_ids:
-        #     taxonomy.append(ref_tax_dict[acc_id])
-        # n = 5  # genus level
-        # while len(taxonomy) > 1:
-        #     for i in range(0, len(taxonomy)):
-        #         taxonomy[i] = taxonomy[i][:n]
-        #     j = 0
-        #     while j < len(taxonomy) - 1:
-        #         if taxonomy[j] == taxonomy[j+1]:
-        #             del(taxonomy[j+1])
-        #         else:
-        #             j += 1
-        #     n -= 1
-        #     tax_class_dict[seq_num] = taxonomy
-
-        # 2) To classify by most k-mers shared
-        # key_value_tuples = common_k_mer_dict.items()
-        # max_match_id = max(key_value_tuples, key=itemgetter(1))[0]
-        # tax_class_dict[seq_num] = ref_tax_dict[max_match_id]
-
-        # 3) To classify based on LCA from within 1 SD of max # k-mers shared
-        std = np.std(list(common_k_mer_dict.values()))
-        key_value_tuples = common_k_mer_dict.items()
-        sorted_tuples = sorted(key_value_tuples, key=lambda x: x[1])
-        tuples_above_std = filter(lambda x: x[1] > std, sorted_tuples)
-        filtered_common_k_mer_dict = dict(list(tuples_above_std))
-
         taxonomy = []
-        acc_ids = list(filtered_common_k_mer_dict)
         for acc_id in acc_ids:
             taxonomy.append(ref_tax_dict[acc_id])
         n = 5  # genus level
@@ -156,7 +127,36 @@ def classify(seq_num, common_k_mer_dict, ref_tax_dict, tax_class_dict, unclassif
                 else:
                     j += 1
             n -= 1
-            tax_class_dict[seq_num] = taxonomy[0]
+            tax_class_dict[seq_num] = taxonomy
+
+        # 2) To classify by most k-mers shared
+        # key_value_tuples = common_k_mer_dict.items()
+        # max_match_id = max(key_value_tuples, key=itemgetter(1))[0]
+        # tax_class_dict[seq_num] = ref_tax_dict[max_match_id]
+
+        # 3) To classify based on LCA from within 1 SD of max # k-mers shared
+        # std = np.std(list(common_k_mer_dict.values()))
+        # key_value_tuples = common_k_mer_dict.items()
+        # sorted_tuples = sorted(key_value_tuples, key=lambda x: x[1])
+        # tuples_above_std = filter(lambda x: x[1] > std, sorted_tuples)
+        # filtered_common_k_mer_dict = dict(list(tuples_above_std))
+
+        # taxonomy = []
+        # acc_ids = list(filtered_common_k_mer_dict)
+        # for acc_id in acc_ids:
+        #     taxonomy.append(ref_tax_dict[acc_id])
+        # n = 5  # genus level
+        # while len(taxonomy) > 1:
+        #     for i in range(0, len(taxonomy)):
+        #         taxonomy[i] = taxonomy[i][:n]
+        #     j = 0
+        #     while j < len(taxonomy) - 1:
+        #         if taxonomy[j] == taxonomy[j+1]:
+        #             del(taxonomy[j+1])
+        #         else:
+        #             j += 1
+        #     n -= 1
+        #     tax_class_dict[seq_num] = taxonomy[0]
 
         # count reads with no hits above required threshold as unclassified
     else:
@@ -167,13 +167,14 @@ def classify(seq_num, common_k_mer_dict, ref_tax_dict, tax_class_dict, unclassif
 
 def write_results(true_tax, tax_class_dict, total_reads, k, req_hits, num_test_seqs):
     # check accuracy
-    class_correct = {'Domain': 0, 'Phylum': 0, 'Order': 0, 'Family': 0, 'Genus': 0}
-    class_incorrect = {'Domain': 0, 'Phylum': 0, 'Order': 0, 'Family': 0, 'Genus': 0}
+    class_correct1 = {'Domain': 0, 'Phylum': 0, 'Order': 0, 'Family': 0, 'Genus': 0, 'Species': 0}
+    class_correct2 = {'Domain': 0, 'Phylum '}
+    class_incorrect = {'Domain': 0, 'Phylum': 0, 'Order': 0, 'Family': 0, 'Genus': 0, 'Species': 0}
     total_correct = 0
     total_incorrect = 0
     total_specific_correct = 0
     # this assumes annotations('taxonomy') is consistently the same taxonomic levels:
-    index_to_taxa = {0: 'Domain', 1: 'Phylum', 2: 'Order', 3: 'Family', 4: 'Genus'}
+    index_to_taxa = {0: 'Domain', 1: 'Phylum', 2: 'Order', 3: 'Family', 4: 'Genus', 5: 'Species'}
 
     for key in tax_class_dict:
         # for correctly classified reads
@@ -183,7 +184,7 @@ def write_results(true_tax, tax_class_dict, total_reads, k, req_hits, num_test_s
                 class_correct[index_to_taxa[tax_index]] += 1
             except KeyError:
                 print(tax_class_dict[key])
-                print("does not fit taxonomy format 'Domain, Phylum, Order, Family, Genus'")
+                print("does not fit taxonomy format 'Domain, Phylum, Order, Family, Genus, Species'")
             total_correct += 1
             if tax_class_dict[key][-1] != true_tax[0]:
                 total_specific_correct += 1
@@ -194,7 +195,7 @@ def write_results(true_tax, tax_class_dict, total_reads, k, req_hits, num_test_s
                 class_incorrect[index_to_taxa[tax_index]] += 1
             except KeyError:
                 print(tax_class_dict[key])
-                print("does not fit taxonomy format 'Domain, Phylum, Order, Family, Genus'")
+                print("does not fit taxonomy format 'Domain, Phylum, Order, Family, Genus, Species'")
             total_incorrect += 1
 
     unclassified = total_reads - total_correct - total_incorrect
@@ -204,12 +205,15 @@ def write_results(true_tax, tax_class_dict, total_reads, k, req_hits, num_test_s
     except ZeroDivisionError:
         precision = 0
     sensitivity_domain = (class_correct['Domain'] + class_correct['Phylum'] + class_correct['Order'] + class_correct[
-        'Family'] + class_correct['Genus'])*100/total_reads
+        'Family'] + class_correct['Genus'] + class_correct['Species'])*100/total_reads
     sensitivity_phylum = (class_correct['Phylum'] + class_correct['Order'] + class_correct['Family'] + class_correct[
-        'Genus']) * 100 / total_reads
-    sensitivity_order = (class_correct['Order'] + class_correct['Family'] + class_correct['Genus']) * 100 / total_reads
-    sensitivity_family = (class_correct['Family'] + class_correct['Genus']) * 100 / total_reads
-    sensitivity_genus = (class_correct['Genus']) * 100 / total_reads
+        'Genus'] + class_correct['Species']) * 100 / total_reads
+    sensitivity_order = (class_correct['Order'] + class_correct['Family'] + class_correct['Genus'] + class_correct[
+        'Species']) * 100 / total_reads
+    sensitivity_family = (class_correct['Family'] + class_correct['Genus'] + class_correct[
+        'Species']) * 100 / total_reads
+    sensitivity_genus = (class_correct['Genus'] + class_correct['Species']) * 100 / total_reads
+    sensitivity_species = (class_correct['Species']) * 100 / total_reads
 
     # write results to file "classification_results.txt"
     file = open("classification_results.txt", 'a')
@@ -219,7 +223,8 @@ def write_results(true_tax, tax_class_dict, total_reads, k, req_hits, num_test_s
     file.write('{0:.2f}% sensitivity at the phylum level\n'.format(sensitivity_phylum))
     file.write('{0:.2f}% sensitivity at the order level\n'.format(sensitivity_order))
     file.write('{0:.2f}% sensitivity at the family level\n'.format(sensitivity_family))
-    file.write('{0:.2f}% sensitivity at the genus level\n\n'.format(sensitivity_genus))
+    file.write('{0:.2f}% sensitivity at the genus level\n'.format(sensitivity_genus))
+    file.write('{0:.2f}% sensitivity at the species level\n\n'.format(sensitivity_species))
     file.close()
 
 
