@@ -1,0 +1,90 @@
+organism: Atopobium rimae, k = 16, required k-mer hits = 1, # of sequences tested = 500
+
+99.00% precision
+91.00% sensitivity at the domain level
+85.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+organism: Astrosporangium hypotensionis, k = 16, required k-mer hits = 1, # of sequences tested = 500
+
+100.00% precision
+100.00% sensitivity at the domain level
+96.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+organism: Candidatus Microthrix sp. UBA1665, k = 16, required k-mer hits = 1, # of sequences tested = 500
+
+97.00% precision
+96.00% sensitivity at the domain level
+93.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+organism: Mycobacterium tuberculosis complex, k = 16, required k-mer hits = 1, # of sequences tested = 500
+
+100.00% precision
+99.00% sensitivity at the domain level
+97.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+organism: Zhihengliuella sp. ISTPL4, k = 16, required k-mer hits = 1, # of sequences tested = 500
+
+100.00% precision
+100.00% sensitivity at the domain level
+98.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+organism: Atopobium rimae, k = 16, required k-mer hits = 1, # of sequences tested = 10
+
+0.00% precision
+0.00% sensitivity at the domain level
+0.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+organism: Astrosporangium hypotensionis, k = 16, required k-mer hits = 1, # of sequences tested = 10
+
+0.00% precision
+0.00% sensitivity at the domain level
+0.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+organism: Candidatus Microthrix sp. UBA1665, k = 16, required k-mer hits = 1, # of sequences tested = 10
+
+0.00% precision
+0.00% sensitivity at the domain level
+0.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+organism: Mycobacterium tuberculosis complex, k = 16, required k-mer hits = 1, # of sequences tested = 10
+
+100.00% precision
+10.00% sensitivity at the domain level
+10.00% sensitivity at the phylum level
+10.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+
+organism: Zhihengliuella sp. ISTPL4, k = 16, required k-mer hits = 1, # of sequences tested = 10
+
+0.00% precision
+0.00% sensitivity at the domain level
+0.00% sensitivity at the phylum level
+0.00% sensitivity at the order level
+0.00% sensitivity at the family level
+0.00% sensitivity at the genus level
+

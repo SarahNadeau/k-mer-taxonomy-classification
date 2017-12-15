@@ -6,8 +6,7 @@ import json
 from math import floor
 
 
-# This function builds a tree of reference genome k-mers w/
-# where each node is the set of k-mers existing in all the members of that taxa
+# This function builds a dictionary of reference genome taxonomy
 def build_ref_tax_dict():
     print("...building reference taxonomy dictionary")
     file_list = []
@@ -16,17 +15,24 @@ def build_ref_tax_dict():
             file_name = os.path.join("Genomes", file_name)
             file_list.append(file_name)
     # make dictionary of reference organism sequence objects labeled by seq_id
+    num_ref_seqs = 0
     ref_genome_dict = {}
     ref_tax_dict = {}
     for file in file_list:
         for accession in SeqIO.parse(file, 'genbank'):
-            ref_genome_dict[accession.id] = accession.seq
             taxonomy = accession.annotations['taxonomy']
+            # add species only to organisms without species/ species complex already in taxonomy
             if accession.annotations['organism'].split(' ')[1] not in taxonomy[-1]:
                 taxonomy.append(accession.annotations['organism'])
-            ref_tax_dict[accession.id] = taxonomy
+            # eliminate genomes with class as part of taxonomy
+            if len(taxonomy) == 6:
+                ref_tax_dict[accession.id] = taxonomy
+                ref_genome_dict[accession.id] = accession.seq
+                num_ref_seqs += 1
     return ref_tax_dict, ref_genome_dict
 
+
+# This function builds a dictionary of overlapping reference genome k-mers
 def build_ref_kmer_dict_overlapping(ref_genome_dict, ref_tax_dict, k):
 
     # ref_kmer_dict keys are k-mers and values are NCBI seq-ids
@@ -44,12 +50,13 @@ def build_ref_kmer_dict_overlapping(ref_genome_dict, ref_tax_dict, k):
 
     return ref_kmer_dict
 
+
+# This function builds a dictionary of non-overlapping reference genome k-mers
 def build_ref_kmer_dict_no_overlap(ref_genome_dict, ref_tax_dict, k):
     print("...adding genomes to reference k-mer dictionary")
     # ref_kmer_dict keys are k-mers and values are NCBI seq-ids
     ref_kmer_dict = {}
     for seq_id in ref_genome_dict:
-        # print("Adding {} to reference genome k-mer dictionary.".format(ref_tax_dict[seq_id]))
         for s in range(0, int(floor(len(ref_genome_dict[seq_id])/k))):
             k_mer = str(ref_genome_dict[seq_id][k * s : k * s + k])
             if k_mer not in ref_kmer_dict:  # if this is 1st occurrence of the k-mer, add empty dict. entry for org.
@@ -61,6 +68,8 @@ def build_ref_kmer_dict_no_overlap(ref_genome_dict, ref_tax_dict, k):
     return ref_kmer_dict
 
 
+# this function writes dictionaries to a file so that they do not have to be recreated with every run of the classify
+# program
 def write_to_file(ref_k_mer_dict, ref_tax_dict, k):
     # make k_mer dictionary into string using json
     print("...writing k_mer dictionary to file")
