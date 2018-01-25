@@ -1,3 +1,5 @@
+# This script generates k-mers from random start positions in the SRA sequences in folder SRA_Test_Sequences
+
 from Bio import SeqIO
 import os
 import numpy as np
@@ -38,7 +40,7 @@ def get_test_tax(file):
 
 
 def main():
-    # get one exact test sequence from each
+    # define parameters
     kmer_len = 150
     num_reads = 5
 
